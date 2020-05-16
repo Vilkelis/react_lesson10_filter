@@ -1,9 +1,9 @@
 import React from 'react'
 import {useSelector, useDispatch} from 'react-redux';
-import {removeService, editService} from '../actions/actionCreators';
+import {removeService, editService, filterService} from '../actions/actionCreators';
 
 function ServiceList() {
-  const items = useSelector(state => state.serviceList);
+  const {filterText, items} = useSelector(state => state.serviceList);
   const dispatch = useDispatch();
 
   const handleRemove = id => {
@@ -15,16 +15,28 @@ function ServiceList() {
     dispatch(editService(id, name, price));
   }
 
+  const handleFilterChange = evt => {
+    const {value} = evt.target;    
+    dispatch(filterService(value));
+  }
+  
   return (
-    <ul>
-      {items.map(o => (
-        <li key={o.id}>
-          {o.name} {o.price}
-          <button onClick={() => handleEdit(o)}>Edit</button>
-          <button onClick={() => handleRemove(o.id)}>✕</button>
-        </li>
-      ))}
-    </ul>
+    <>
+      <hr/>
+      <div>
+        <label htmlFor="filterText">Search: </label>
+        <input name='filterText' onChange={handleFilterChange} value={filterText} />
+      </div>
+      <ul>
+        {items.filter( o => !filterText || o.name.toString().includes(filterText)).map(o => (
+          <li key={o.id}>
+            {o.name} {o.price}
+            <button onClick={() => handleEdit(o)}>Edit</button>
+            <button onClick={() => handleRemove(o.id)}>✕</button>
+          </li>
+        ))}
+      </ul>
+    </>
   )
 }
 

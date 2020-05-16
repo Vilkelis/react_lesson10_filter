@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {removeService, editService} from '../actions/actionCreators';
+import {removeService, editService, filterService} from '../actions/actionCreators';
 import {connect} from 'react-redux';
 
 class ServiceListClassBased extends Component {
@@ -13,12 +13,23 @@ class ServiceListClassBased extends Component {
     this.props.editService(id, name, price);
   }
 
-  render() {
-    const {items} = this.props;
+  handleFilterChange = evt => {
+    const {value} = evt.target;    
+    this.props.filterService(value);     
+  }
+  
+  render() {     
+    const {filterText, items} = this.props.items;
 
     return (
+      <>
+      <hr/>
+      <div>
+        <label htmlFor="filterText">Search: </label>
+        <input name='filterText' onChange={this.handleFilterChange} value={filterText} />
+      </div>      
       <ul>
-        {items.map(o => (
+        {items.filter( o => !filterText || o.name.toString().includes(filterText)).map(o => (
           <li key={o.id}>
             {o.name} {o.price}
             <button onClick={() => this.handleEdit(o)}>Edit</button>
@@ -26,16 +37,20 @@ class ServiceListClassBased extends Component {
           </li>
         ))}
       </ul>
+      </>
     )
   }
 }
 
-ServiceListClassBased.propTypes = {
-  items: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string,
-    name: PropTypes.string,
-    price: PropTypes.number,
-  })).isRequired,
+ServiceListClassBased.propTypes = {  
+  items: PropTypes.shape({ 
+      items: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.string,
+        name: PropTypes.string,
+        price: PropTypes.number,
+      })).isRequired,
+      filterText: PropTypes.string
+    }).isRequired
 }
 
 const mapStateToProps = (state) => ({
@@ -51,6 +66,7 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = ({
   editService,
   removeService,
+  filterService
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ServiceListClassBased);
